@@ -112,7 +112,7 @@ def main(key):
                             ])
                             )
 
-    dataloader = DataLoader(cars_data, batch_size=16,
+    dataloader = DataLoader(cars_data, batch_size=8,
                             shuffle=True, num_workers=8)
     print("Train data set length:", len(cars_data))
 
