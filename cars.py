@@ -201,8 +201,9 @@ def main(key):
         total = 0
         for data in tqdm(testloader):
             images, labels = data
-            labels = labels.type(torch.LongTensor)
-            outputs = model_ft(Variable(images))
+            labels = labels.type(torch.LongTensor).cuda()
+            images = Variable(images).cuda()
+            outputs = model_ft(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum()
