@@ -75,13 +75,6 @@ class CarsDataset(Dataset):
         return ret
 
     def show_batch(self, img_batch, class_batch):
-        # tp = transforms.ToPILImage()
-        # print("img_type", type(img_batch))
-        # print("class_type", type(class_batch))
-        # class_batch = class_batch.numpy()
-
-        # print(tp(img_batch[0, ...]))
-        # plt.imshow(tp(img_batch[0, ...]))
 
         for i in range(img_batch.shape[0]):
             ax = plt.subplot(1, img_batch.shape[0], i + 1)
@@ -94,10 +87,10 @@ class CarsDataset(Dataset):
 
 def main(key):
     num_epochs = 25  # into json file
-    cars_data = CarsDataset('/home/daniel/Code/vision/data/cars/devkit/cars_train_annos.mat',
-                            '/home/daniel/Code/vision/data/cars/cars_train',
-                            '/home/daniel/Code/vision/data/cars/devkit/cars_meta.mat',
-                            cleaned='/home/daniel/Code/vision/data/cars/cleaned.dat',
+    cars_data = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
+                            '../../../data/cars/cars_train',
+                            '../../../data/cars/devkit/cars_meta.mat',
+                            cleaned='../../../data/cars/cleaned.dat',
                             transform=transforms.Compose([
                                 transforms.Scale(350),
                                 transforms.RandomSizedCrop(270),
@@ -107,10 +100,10 @@ def main(key):
                             ])
                             )
 
-    cars_data_test = CarsDataset('/home/daniel/Code/vision/data/cars/devkit/cars_train_annos.mat',
-                            '/home/daniel/Code/vision/data/cars/cars_train',
-                            '/home/daniel/Code/vision/data/cars/devkit/cars_meta.mat',
-                            cleaned='/home/daniel/Code/vision/data/cars/cleaned_test.dat',
+    cars_data_test = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
+                            '../../../data/cars/cars_train',
+                            '../../../data/cars/devkit/cars_meta.mat',
+                            cleaned='../../../data/cars/cleaned_test.dat',
                             transform=transforms.Compose([
                                 transforms.Scale(350),
                                 transforms.ToTensor(),
