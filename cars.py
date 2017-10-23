@@ -86,7 +86,7 @@ class CarsDataset(Dataset):
 
 
 def main(key):
-    num_epochs = 25  # into json file
+    num_epochs = 120  # into json file
     cars_data = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
                             '../../../data/cars/cars_train',
                             '../../../data/cars/devkit/cars_meta.mat',
