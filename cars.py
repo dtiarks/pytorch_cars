@@ -105,8 +105,8 @@ def main(key):
                             '../../../data/cars/devkit/cars_meta.mat',
                             cleaned='../../../data/cars/cleaned_test.dat',
                             transform=transforms.Compose([
-                                transforms.Scale(350),
-                                transforms.RandomSizedCrop(270),
+                                transforms.Scale(270),
+                                # transforms.RandomSizedCrop(270),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                             ])
@@ -134,7 +134,7 @@ def main(key):
 
     session = losswise.Session(tag='Resnet18_cars', max_iter=num_epochs)
     graph_tloss = session.graph('loss', kind='min')
-    graph_acc = session.graph('accuracy', kind='min')
+    graph_acc = session.graph('accuracy', kind='max')
 
 
     model_ft = models.resnet18(pretrained=True)
@@ -152,7 +152,7 @@ def main(key):
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
     # Decay LR by a factor of 0.1 every 7 epochs
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=12, gamma=0.1)
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
