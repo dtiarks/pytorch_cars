@@ -89,7 +89,7 @@ class CarsDataset(Dataset):
 class Densenet161(nn.Module):
     def __init__(self, num_classes = 197):
         super(Densenet161,self).__init__()
-        original_model = models.densenet161(pretrained=True)
+        original_model = models.densenet161(pretrained=True, drop_rate=0.5)
         self.features = nn.Sequential(*list(original_model.children())[:-1])
         self.classifier = (nn.Linear(2208, num_classes))
 
