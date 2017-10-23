@@ -112,12 +112,12 @@ def main(key):
                             ])
                             )
 
-    dataloader = DataLoader(cars_data, batch_size=4,
-                            shuffle=True, num_workers=4)
+    dataloader = DataLoader(cars_data, batch_size=16,
+                            shuffle=True, num_workers=8)
     print("Train data set length:", len(cars_data))
 
     testloader = DataLoader(cars_data_test, batch_size=4,
-                            shuffle=True, num_workers=1)
+                            shuffle=True, num_workers=4)
     print("Test data set length:", len(cars_data_test))
 
     losswise.set_api_key(key)
