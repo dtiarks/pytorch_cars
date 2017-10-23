@@ -86,7 +86,7 @@ class CarsDataset(Dataset):
 
 
 def main(key):
-    num_epochs = 120  # into json file
+    num_epochs = 250  # into json file
     cars_data = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
                             '../../../data/cars/cars_train',
                             '../../../data/cars/devkit/cars_meta.mat',
@@ -151,8 +151,8 @@ def main(key):
     # Observe that all parameters are being optimized
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
-    # Decay LR by a factor of 0.1 every 7 epochs
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=12, gamma=0.1)
+    # Decay LR by a factor of 0.1 every 20 epochs
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
