@@ -137,12 +137,14 @@ def main(key):
     graph_acc = session.graph('accuracy', kind='max')
 
 
-    model_ft = models.resnet18(pretrained=True)
+    # model_ft = models.resnet18(pretrained=True)
     # for param in model_ft.parameters():
     #     param.requires_grad = False
+    model_ft = models.densenet121(pretrained=True, drop_rate=0.5, num_classes=197)
 
-    num_ftrs = model_ft.fc.in_features
-    model_ft.fc = nn.Linear(num_ftrs, 197)
+    # num_ftrs = model_ft.fc.in_features
+    # model_ft.fc = nn.Linear(num_ftrs, 197)
+
 
     model_ft = model_ft.cuda()
 
