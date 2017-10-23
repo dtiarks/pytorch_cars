@@ -145,7 +145,7 @@ def main(key):
 
     model_ft = model_ft.cuda()
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss().cuda()
 
     # Observe that all parameters are being optimized
     optimizer_ft = optim.SGD(model_ft.fc.parameters(), lr=0.001, momentum=0.9)
@@ -166,7 +166,7 @@ def main(key):
         for batch in tqdm(dataloader):
             c += 1
             inputs, labels = batch
-            labels = labels.type(torch.LongTensor)
+            labels = labels.type(torch.LongTensor).cuda()
 
             inputs, labels = Variable(inputs), Variable(labels)
 
