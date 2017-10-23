@@ -87,9 +87,9 @@ class CarsDataset(Dataset):
 
 
 class Densenet161(nn.Module):
-    def __init__(self, num_classes = 197):
+    def __init__(self, num_classes = 197, drop_rate=0.):
         super(Densenet161,self).__init__()
-        original_model = models.densenet161(pretrained=True, drop_rate=0.5)
+        original_model = models.densenet161(pretrained=True, drop_rate=drop_rate)
         self.features = nn.Sequential(*list(original_model.children())[:-1])
         self.classifier = (nn.Linear(2208, num_classes))
 
@@ -99,6 +99,7 @@ class Densenet161(nn.Module):
         f = F.avg_pool2d(f, kernel_size=7).view(f.size(0), -1)
         y = self.classifier(f)
         return y
+
 
 
 def main(key):
@@ -162,11 +163,11 @@ def main(key):
     # model_ft = models.densenet121(pretrained=True)
     # num_ftrs = 64
     # model_ft.classifier = nn.Linear(num_ftrs, 1000)
-    model_ft = Densenet161()
-
-
+    model_ft = Densenet161(drop_rate=0.5)
+    model_test = Densenet161()
 
     model_ft = model_ft.cuda()
+    model_test = model_test.cuda()
 
     criterion = nn.CrossEntropyLoss().cuda()
     # criterion = nn.CrossEntropyLoss()
@@ -219,7 +220,8 @@ def main(key):
         graph_tloss.append(epoch, {'train_loss': running_loss / c})
         graph_acc.append(epoch, {'train_acc': train_acc})
 
-        model_ft.train(False)
+        model_test.train(False)
+        model_test.load_state_dict(model_ft.state_dict())
 
         correct = 0
         total = 0
@@ -228,7 +230,7 @@ def main(key):
             labels = labels.type(torch.LongTensor).cuda()
             images = Variable(images).cuda()
             # images = Variable(images)
-            outputs = model_ft(images)
+            outputs = model_test(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum()
