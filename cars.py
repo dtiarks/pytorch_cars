@@ -98,7 +98,7 @@ class Densenet161(nn.Module):
         f = F.relu(f, inplace=True)
         f = F.avg_pool2d(f, kernel_size=7).view(f.size(0), -1)
         y = self.classifier(f)
-        return f,y
+        return y
 
 
 def main(key):
