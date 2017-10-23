@@ -92,8 +92,8 @@ def main(key):
                             '../../../data/cars/devkit/cars_meta.mat',
                             cleaned='../../../data/cars/cleaned.dat',
                             transform=transforms.Compose([
-                                transforms.Scale(450),
-                                transforms.RandomSizedCrop(370),
+                                # transforms.Scale(450),
+                                transforms.RandomSizedCrop(224),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -105,8 +105,8 @@ def main(key):
                             '../../../data/cars/devkit/cars_meta.mat',
                             cleaned='../../../data/cars/cleaned_test.dat',
                             transform=transforms.Compose([
-                                transforms.Scale(450),
-                                transforms.RandomSizedCrop(370),
+                                transforms.Scale(256),
+                                transforms.RandomSizedCrop(224),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                             ])
