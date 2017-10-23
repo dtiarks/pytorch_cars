@@ -12,6 +12,7 @@ from torch.optim import lr_scheduler
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, models, transforms
 from torch.autograd import Variable
+import torch.nn.functional as F
 import losswise
 
 from PIL import Image
