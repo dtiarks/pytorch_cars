@@ -106,6 +106,7 @@ def main(key):
                             cleaned='../../../data/cars/cleaned_test.dat',
                             transform=transforms.Compose([
                                 transforms.Scale(350),
+                                transforms.RandomSizedCrop(270),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                             ])
