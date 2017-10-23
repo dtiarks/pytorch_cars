@@ -85,6 +85,21 @@ class CarsDataset(Dataset):
             plt.tight_layout()
 
 
+class Densenet161(nn.Module):
+    def __init__(self, num_classes = 197):
+        super(Densenet161,self).__init__()
+        original_model = models.densenet161(pretrained=True)
+        self.features = nn.Sequential(*list(original_model.children())[:-1])
+        self.classifier = (nn.Linear(2208, num_classes))
+
+    def forward(self, x):
+        f = self.features(x)
+        f = F.relu(f, inplace=True)
+        f = F.avg_pool2d(f, kernel_size=7).view(f.size(0), -1)
+        y = self.classifier(f)
+        return f,y
+
+
 def main(key):
     num_epochs = 250  # into json file
     cars_data = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
@@ -143,9 +158,10 @@ def main(key):
     # num_ftrs = model_ft.fc.in_features
     # model_ft.fc = nn.Linear(num_ftrs, 197)
 
-    model_ft = models.densenet121(pretrained=True)
-    num_ftrs = 64
-    model_ft.classifier = nn.Linear(num_ftrs, 1000)
+    # model_ft = models.densenet121(pretrained=True)
+    # num_ftrs = 64
+    # model_ft.classifier = nn.Linear(num_ftrs, 1000)
+    model_ft = Densenet161()
 
 
 
