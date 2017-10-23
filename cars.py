@@ -145,7 +145,7 @@ def main(key):
 
     model_ft = models.densenet121(pretrained=True, drop_rate=0.5)
     num_ftrs = 64
-    model_ft.classifier = nn.Linear(num_ftrs, 197)
+    model_ft.classifier = nn.Linear(num_ftrs, 1000)
 
 
 
