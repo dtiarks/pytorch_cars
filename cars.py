@@ -1,10 +1,11 @@
 from __future__ import print_function, division
 import os
+import sys
 import torch
-from skimage import io, transform
+# from skimage import io, transform
 import numpy as np
 import scipy.io
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
@@ -21,7 +22,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-plt.ion()  # interactive mode
+# plt.ion()  # interactive mode
 
 
 class CarsDataset(Dataset):
@@ -91,7 +92,7 @@ class CarsDataset(Dataset):
             plt.tight_layout()
 
 
-def main():
+def main(key):
     num_epochs = 25  # into json file
     cars_data = CarsDataset('/home/daniel/Code/vision/data/cars/devkit/cars_train_annos.mat',
                             '/home/daniel/Code/vision/data/cars/cars_train',
@@ -125,10 +126,7 @@ def main():
                             shuffle=True, num_workers=1)
     print("Test data set length:", len(cars_data_test))
 
-    losswise.set_api_key("iz1v8ia4i")
-
-    dataiter = iter(dataloader)
-    images, labels = dataiter.next()
+    losswise.set_api_key(key)
 
 
     # for i, batch in enumerate(dataloader):
@@ -224,7 +222,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
 
 
 
