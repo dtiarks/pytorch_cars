@@ -137,7 +137,7 @@ def main(key):
     graph_acc = session.graph('accuracy', kind='max')
 
 
-    model_ft = models.resnet18(pretrained=True)
+    model_ft = models.resnet50(pretrained=True)
     # for param in model_ft.parameters():
     #     param.requires_grad = False
 
