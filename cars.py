@@ -166,9 +166,9 @@ def main(key):
         for batch in tqdm(dataloader):
             c += 1
             inputs, labels = batch
-            labels = labels.type(torch.LongTensor).cuda()
+            labels = labels.type(torch.LongTensor)
 
-            inputs, labels = Variable(inputs), Variable(labels)
+            inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
 
             optimizer_ft.zero_grad()
 
