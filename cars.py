@@ -138,8 +138,8 @@ def main(key):
 
 
     model_ft = models.resnet18(pretrained=True)
-    for param in model_ft.parameters():
-        param.requires_grad = False
+    # for param in model_ft.parameters():
+    #     param.requires_grad = False
 
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, 197)
@@ -149,7 +149,7 @@ def main(key):
     criterion = nn.CrossEntropyLoss().cuda()
 
     # Observe that all parameters are being optimized
-    optimizer_ft = optim.SGD(model_ft.fc.parameters(), lr=0.001, momentum=0.9)
+    optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
     # Decay LR by a factor of 0.1 every 7 epochs
     exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
