@@ -100,8 +100,8 @@ def main(key):
                             ])
                             )
 
-    cars_data_test = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
-                            '../../../data/cars/cars_train',
+    cars_data_test = CarsDataset('../../../data/cars/devkit/cars_test_annos_withlabels.mat',
+                            '../../../data/cars/cars_test',
                             '../../../data/cars/devkit/cars_meta.mat',
                             cleaned='../../../data/cars/cleaned_test.dat',
                             transform=transforms.Compose([
@@ -137,7 +137,7 @@ def main(key):
     graph_acc = session.graph('accuracy', kind='max')
 
 
-    model_ft = models.resnet50(pretrained=True)
+    model_ft = models.resnet18(pretrained=True)
     # for param in model_ft.parameters():
     #     param.requires_grad = False
 
@@ -147,6 +147,7 @@ def main(key):
     model_ft = model_ft.cuda()
 
     criterion = nn.CrossEntropyLoss().cuda()
+    # criterion = nn.CrossEntropyLoss()
 
     # Observe that all parameters are being optimized
     optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
@@ -170,6 +171,7 @@ def main(key):
             labels = labels.type(torch.LongTensor)
 
             inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
+            # inputs, labels = Variable(inputs), Variable(labels)
 
             optimizer_ft.zero_grad()
 
@@ -195,7 +197,7 @@ def main(key):
         graph_tloss.append(epoch, {'train_loss': running_loss / c})
         graph_acc.append(epoch, {'train_acc': train_acc})
 
-
+        model_ft.train(False)
 
         correct = 0
         total = 0
@@ -203,6 +205,7 @@ def main(key):
             images, labels = data
             labels = labels.type(torch.LongTensor).cuda()
             images = Variable(images).cuda()
+            # images = Variable(images)
             outputs = model_ft(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
