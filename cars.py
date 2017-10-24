@@ -29,11 +29,11 @@ warnings.filterwarnings("ignore")
 class CarsDataset(Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, mat_anno, root_dir, car_names, cleaned=None, transform=None):
+    def __init__(self, mat_anno, data_dir, car_names, cleaned=None, transform=None):
         """
         Args:
             mat_anno (string): Path to the MATLAB annotation file.
-            root_dir (string): Directory with all the images.
+            data_dir (string): Directory with all the images.
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
@@ -54,14 +54,14 @@ class CarsDataset(Dataset):
         self.car_names = scipy.io.loadmat(car_names)['class_names']
         self.car_names = np.array(self.car_names[0])
 
-        self.root_dir = root_dir
+        self.data_dir = data_dir
         self.transform = transform
 
     def __len__(self):
         return len(self.car_annotations)
 
     def __getitem__(self, idx):
-        img_name = os.path.join(self.root_dir, self.car_annotations[idx][-1][0])
+        img_name = os.path.join(self.data_dir, self.car_annotations[idx][-1][0])
         image = Image.open(img_name)
         car_class = self.car_annotations[idx][-2][0][0]
 
@@ -114,13 +114,14 @@ def save_model(net, optim, ckpt_fname):
 
 def main(key):
     num_epochs = 250  # into json file
-    root_dir = "../../../data/cars"
+    data_dir = "../../../data/cars"
+    checkpoint_dir = "./checkpoint"
     save_freq = 1
 
-    cars_data = CarsDataset(os.path.join(root_dir,'devkit/cars_train_annos.mat'),
-                            os.path.join(root_dir,'cars_train'),
-                            os.path.join(root_dir,'devkit/cars_meta.mat'),
-                            cleaned=os.path.join(root_dir,'cleaned.dat'),
+    cars_data = CarsDataset(os.path.join(data_dir,'devkit/cars_train_annos.mat'),
+                            os.path.join(data_dir,'cars_train'),
+                            os.path.join(data_dir,'devkit/cars_meta.mat'),
+                            cleaned=os.path.join(data_dir,'cleaned.dat'),
                             transform=transforms.Compose([
                                 # transforms.Scale(450),
                                 transforms.RandomSizedCrop(224),
@@ -130,10 +131,10 @@ def main(key):
                             ])
                             )
 
-    cars_data_test = CarsDataset(os.path.join(root_dir,'devkit/cars_test_annos_withlabels.mat'),
-                            os.path.join(root_dir,'cars_test'),
-                            os.path.join(root_dir,'devkit/cars_meta.mat'),
-                            cleaned=os.path.join(root_dir,'cleaned_test.dat'),
+    cars_data_test = CarsDataset(os.path.join(data_dir,'devkit/cars_test_annos_withlabels.mat'),
+                            os.path.join(data_dir,'cars_test'),
+                            os.path.join(data_dir,'devkit/cars_meta.mat'),
+                            cleaned=os.path.join(data_dir,'cleaned_test.dat'),
                             transform=transforms.Compose([
                                 transforms.Scale(256),
                                 transforms.RandomSizedCrop(224),
@@ -222,9 +223,6 @@ def main(key):
             total += labels.size(0)
             correct += (predicted == labels.data).sum()
 
-            # if c % 500 == 499:
-            #     print('Batchloss: {:.4f}'.format(running_loss / c))
-
         epoch_loss = running_loss / c
         train_acc = 100 * correct / total
         print('Train epoch: {} || Loss: {:.4f} || Acc: {:.2f} %%'.format(
@@ -234,7 +232,7 @@ def main(key):
         graph_acc.append(epoch, {'train_acc': train_acc})
 
         if epoch % save_freq == 0:
-            save_model(model_ft, optimizer_ft, os.path.join(root_dir, 'checkpoints', 'model_%03d.pth' % epoch))
+            save_model(model_ft, optimizer_ft, os.path.join(checkpoint_dir, 'model_%03d.pth' % epoch))
 
         model_test.train(False)
         model_test.load_state_dict(model_ft.state_dict())
