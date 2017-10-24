@@ -113,7 +113,7 @@ def save_model(epoch, net, optim, ckpt_fname):
         ckpt_fname)
 
 def main(key):
-    num_epochs = 250  # into json file
+    num_epochs = 50  # into json file
     data_dir = "../../../data/cars"
     checkpoint_dir = "./checkpoint"
     save_freq = 1
