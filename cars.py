@@ -115,7 +115,7 @@ def save_model(net, optim, ckpt_fname):
 def main(key):
     num_epochs = 250  # into json file
     root_dir = "../../../data/cars"
-    save_freq = 5
+    save_freq = 1
 
     cars_data = CarsDataset(os.path.join(root_dir,'devkit/cars_train_annos.mat'),
                             os.path.join(root_dir,'cars_train'),
