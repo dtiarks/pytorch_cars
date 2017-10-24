@@ -101,8 +101,8 @@ class Densenet161(nn.Module):
         return y
 
 
-def save_model(net, optim, ckpt_fname):
-    state_dict = net.module.state_dict()
+def save_model(epoch, net, optim, ckpt_fname):
+    state_dict = net.state_dict()
     for key in state_dict.keys():
         state_dict[key] = state_dict[key].cpu()
 
@@ -232,7 +232,7 @@ def main(key):
         graph_acc.append(epoch, {'train_acc': train_acc})
 
         if epoch % save_freq == 0:
-            save_model(model_ft, optimizer_ft, os.path.join(checkpoint_dir, 'model_%03d.pth' % epoch))
+            save_model(epoch, model_ft, optimizer_ft, os.path.join(checkpoint_dir, 'model_%03d.pth' % epoch))
 
         model_test.train(False)
         model_test.load_state_dict(model_ft.state_dict())
