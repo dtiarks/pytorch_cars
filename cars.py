@@ -101,13 +101,26 @@ class Densenet161(nn.Module):
         return y
 
 
+def save_model(net, optim, ckpt_fname):
+    state_dict = net.module.state_dict()
+    for key in state_dict.keys():
+        state_dict[key] = state_dict[key].cpu()
+
+    torch.save({
+        'epoch': epoch,
+        'state_dict': state_dict,
+        'optimizer': optim},
+        ckpt_fname)
 
 def main(key):
     num_epochs = 250  # into json file
-    cars_data = CarsDataset('../../../data/cars/devkit/cars_train_annos.mat',
-                            '../../../data/cars/cars_train',
-                            '../../../data/cars/devkit/cars_meta.mat',
-                            cleaned='../../../data/cars/cleaned.dat',
+    root_dir = "../../../data/cars"
+    save_freq = 5
+
+    cars_data = CarsDataset(os.path.join(root_dir,'devkit/cars_train_annos.mat'),
+                            os.path.join(root_dir,'cars_train'),
+                            os.path.join(root_dir,'devkit/cars_meta.mat'),
+                            cleaned=os.path.join(root_dir,'cleaned.dat'),
                             transform=transforms.Compose([
                                 # transforms.Scale(450),
                                 transforms.RandomSizedCrop(224),
@@ -117,10 +130,10 @@ def main(key):
                             ])
                             )
 
-    cars_data_test = CarsDataset('../../../data/cars/devkit/cars_test_annos_withlabels.mat',
-                            '../../../data/cars/cars_test',
-                            '../../../data/cars/devkit/cars_meta.mat',
-                            cleaned='../../../data/cars/cleaned_test.dat',
+    cars_data_test = CarsDataset(os.path.join(root_dir,'devkit/cars_test_annos_withlabels.mat'),
+                            os.path.join(root_dir,'cars_test'),
+                            os.path.join(root_dir,'devkit/cars_meta.mat'),
+                            cleaned=os.path.join(root_dir,'cleaned_test.dat'),
                             transform=transforms.Compose([
                                 transforms.Scale(256),
                                 transforms.RandomSizedCrop(224),
@@ -219,6 +232,9 @@ def main(key):
 
         graph_tloss.append(epoch, {'train_loss': running_loss / c})
         graph_acc.append(epoch, {'train_acc': train_acc})
+
+        if epoch % save_freq == 0:
+            save_model(model_ft, optimizer_ft, os.path.join(root_dir, 'checkpoints', 'model_%03d.pth' % epoch))
 
         model_test.train(False)
         model_test.load_state_dict(model_ft.state_dict())
