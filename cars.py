@@ -112,11 +112,25 @@ def save_model(epoch, net, optim, ckpt_fname):
         'optimizer': optim},
         ckpt_fname)
 
+def load_model():
+    pass
+    # if pretrained is not None:
+    #     state_dict = torch.load(pretrained)
+    #     new_state_dict = OrderedDict()
+    #     for k, value in state_dict['state_dict'].iteritems():
+    #         key = "module.{}".format(k)
+    #         new_state_dict[key] = value
+    #     net.load_state_dict(new_state_dict)
+    #     epoch = state_dict['epoch']
+    #     print
+    #     "pre-trained epoch number: {}".format(epoch)
+    #     optimizer = state_dict['optimizer']
+
 def main(key):
     num_epochs = 50  # into json file
     data_dir = "../../../data/cars"
     checkpoint_dir = "./checkpoint"
-    save_freq = 1
+    save_freq = 10
 
     cars_data = CarsDataset(os.path.join(data_dir,'devkit/cars_train_annos.mat'),
                             os.path.join(data_dir,'cars_train'),
