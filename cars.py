@@ -137,8 +137,8 @@ def main(key):
                             os.path.join(data_dir,'devkit/cars_meta.mat'),
                             cleaned=os.path.join(data_dir,'cleaned.dat'),
                             transform=transforms.Compose([
-                                transforms.Scale(250),
-                                transforms.RandomSizedCrop(200),
+                                # transforms.Scale(250),
+                                transforms.RandomSizedCrop(250),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
