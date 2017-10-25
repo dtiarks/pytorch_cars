@@ -137,8 +137,8 @@ def main(key):
                             os.path.join(data_dir,'devkit/cars_meta.mat'),
                             cleaned=os.path.join(data_dir,'cleaned.dat'),
                             transform=transforms.Compose([
-                                # transforms.Scale(450),
-                                transforms.RandomSizedCrop(224),
+                                transforms.Scale(200),
+                                transforms.RandomSizedCrop(160),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -150,8 +150,8 @@ def main(key):
                             os.path.join(data_dir,'devkit/cars_meta.mat'),
                             cleaned=os.path.join(data_dir,'cleaned_test.dat'),
                             transform=transforms.Compose([
-                                transforms.Scale(256),
-                                transforms.RandomSizedCrop(224),
+                                # transforms.Scale(256),
+                                # transforms.RandomSizedCrop(224),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                             ])
@@ -161,8 +161,8 @@ def main(key):
                             shuffle=True, num_workers=8)
     print("Train data set length:", len(cars_data))
 
-    testloader = DataLoader(cars_data_test, batch_size=4,
-                            shuffle=True, num_workers=4)
+    testloader = DataLoader(cars_data_test, batch_size=1,
+                            shuffle=True, num_workers=1)
     print("Test data set length:", len(cars_data_test))
 
     losswise.set_api_key(key)
@@ -177,7 +177,7 @@ def main(key):
     #     plt.pause(4)
     #     plt.clf()
 
-    session = losswise.Session(tag='Resnet18_cars', max_iter=num_epochs)
+    session = losswise.Session(tag='Densnet161_cars', max_iter=num_epochs)
     graph_tloss = session.graph('loss', kind='min')
     graph_acc = session.graph('accuracy', kind='max')
 
