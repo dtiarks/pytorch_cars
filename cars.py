@@ -14,6 +14,7 @@ from torchvision import datasets, models, transforms
 from torch.autograd import Variable
 import torch.nn.functional as F
 import losswise
+import argparse
 
 from PIL import Image
 from tqdm import tqdm
@@ -126,46 +127,59 @@ def load_model():
     #     "pre-trained epoch number: {}".format(epoch)
     #     optimizer = state_dict['optimizer']
 
-def main(key):
-    num_epochs = 50  # into json file
-    data_dir = "../../../data/cars"
+def visualize_batch(batch):
+    pass
+
+def train(params):
+    num_epochs = params["epochs"] # into json file
+    train_batch_size = params["train_batchsize"]
+    train_workers = 8
+    test_batch_size = 8
+    test_workers = 8
+    num_classes = 197
+    data_dir = params["data_dir"]
     checkpoint_dir = "./checkpoint"
-    save_freq = 10
+    save_freq = params["save_freq"]
+    enable_cuda = params["enable_cuda"]
+    learning_rate = params["learning_rate"]
+    lr_updates = params["lr_updates"]
+    lr_gamma = params["lr_gamma"]
+    weight_decay = params["weight_decay"]
 
     cars_data = CarsDataset(os.path.join(data_dir,'devkit/cars_train_annos.mat'),
                             os.path.join(data_dir,'cars_train'),
                             os.path.join(data_dir,'devkit/cars_meta.mat'),
                             cleaned=os.path.join(data_dir,'cleaned.dat'),
                             transform=transforms.Compose([
-                                # transforms.Scale(250),
-                                transforms.RandomSizedCrop(250),
+                                transforms.Scale(250),
+                                transforms.RandomSizedCrop(224),
                                 transforms.RandomHorizontalFlip(),
                                 transforms.ToTensor(),
-                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                transforms.Normalize((0.4706145, 0.46000465, 0.45479808), (0.26668432, 0.26578658, 0.2706199))
                             ])
                             )
 
-    cars_data_test = CarsDataset(os.path.join(data_dir,'devkit/cars_test_annos_withlabels.mat'),
+    cars_data_val = CarsDataset(os.path.join(data_dir,'devkit/cars_test_annos_withlabels.mat'),
                             os.path.join(data_dir,'cars_test'),
                             os.path.join(data_dir,'devkit/cars_meta.mat'),
                             cleaned=os.path.join(data_dir,'cleaned_test.dat'),
                             transform=transforms.Compose([
-                                # transforms.Scale(256),
-                                # transforms.RandomSizedCrop(224),
+                                transforms.Scale(224),
+                                transforms.RandomSizedCrop(224),
                                 transforms.ToTensor(),
-                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                transforms.Normalize((0.46905602, 0.45872932, 0.4539325), (0.26603131, 0.26460057, 0.26935185))
                             ])
                             )
 
-    dataloader = DataLoader(cars_data, batch_size=8,
-                            shuffle=True, num_workers=8)
+    dataloader = DataLoader(cars_data, batch_size=train_batch_size,
+                            shuffle=True, num_workers=train_workers)
     print("Train data set length:", len(cars_data))
 
-    testloader = DataLoader(cars_data_test, batch_size=1,
-                            shuffle=True, num_workers=1)
-    print("Test data set length:", len(cars_data_test))
+    valloader = DataLoader(cars_data_val, batch_size=test_batch_size,
+                            shuffle=True, num_workers=test_workers)
+    print("Validation data set length:", len(cars_data_val))
 
-    losswise.set_api_key(key)
+    losswise.set_api_key(params["key"])
 
 
     # for i, batch in enumerate(dataloader):
@@ -182,29 +196,33 @@ def main(key):
     graph_acc = session.graph('accuracy', kind='max')
 
 
-    # model_ft = models.resnet18(pretrained=True)
+    model_ft = models.resnet18(pretrained=True)
     # for param in model_ft.parameters():
     #     param.requires_grad = False
-    # num_ftrs = model_ft.fc.in_features
-    # model_ft.fc = nn.Linear(num_ftrs, 197)
+    num_ftrs = model_ft.fc.in_features
+    model_ft.fc = nn.Linear(num_ftrs, num_classes)
 
-    # model_ft = models.densenet121(pretrained=True)
-    # num_ftrs = 64
-    # model_ft.classifier = nn.Linear(num_ftrs, 1000)
-    model_ft = Densenet161(drop_rate=0.5)
-    model_test = Densenet161()
+    model_val = models.resnet18(pretrained=True)
+    # for param in model_ft.parameters():
+    #     param.requires_grad = False
+    num_val = model_val.fc.in_features
+    model_val.fc = nn.Linear(num_val, num_classes)
 
-    model_ft = model_ft.cuda()
-    model_test = model_test.cuda()
+    # model_ft = Densenet161(drop_rate=0.5)
+    # model_val = Densenet161()
 
-    criterion = nn.CrossEntropyLoss().cuda()
-    # criterion = nn.CrossEntropyLoss()
+    if enable_cuda:
+        model_ft = model_ft.cuda()
+        model_val = model_val.cuda()
 
-    # Observe that all parameters are being optimized
-    optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+        criterion = nn.CrossEntropyLoss().cuda()
+    else:
+        criterion = nn.CrossEntropyLoss()
 
-    # Decay LR by a factor of 0.1 every 20 epochs
-    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=20, gamma=0.1)
+    # optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9, weight_decay=1e-4)
+    optimizer_ft = optim.Adam(model_ft.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+    exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=lr_updates, gamma=lr_gamma)
 
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -221,8 +239,10 @@ def main(key):
             inputs, labels = batch
             labels = labels.type(torch.LongTensor)
 
-            inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
-            # inputs, labels = Variable(inputs), Variable(labels)
+            if enable_cuda:
+                inputs, labels = Variable(inputs).cuda(), Variable(labels).cuda()
+            else:
+                inputs, labels = Variable(inputs), Variable(labels)
 
             optimizer_ft.zero_grad()
 
@@ -248,31 +268,56 @@ def main(key):
         if epoch % save_freq == 0:
             save_model(epoch, model_ft, optimizer_ft, os.path.join(checkpoint_dir, 'model_%03d.pth' % epoch))
 
-        model_test.train(False)
-        model_test.load_state_dict(model_ft.state_dict())
+        model_val.train(False)
+        model_val.load_state_dict(model_ft.state_dict())
 
         correct = 0
         total = 0
-        for data in tqdm(testloader):
+        for data in tqdm(valloader):
             images, labels = data
-            labels = labels.type(torch.LongTensor).cuda()
-            images = Variable(images).cuda()
-            # images = Variable(images)
-            outputs = model_test(images)
+
+            if enable_cuda:
+                labels = labels.type(torch.LongTensor).cuda()
+                images = Variable(images).cuda()
+            else:
+                images = Variable(images)
+
+            outputs = model_val(images)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum()
 
-        test_acc = 100 * correct / total
-        print('Test Acc: {:.2f} %%'.format(test_acc))
+        val_acc = 100 * correct / total
+        print('Validation Acc: {:.2f} %%'.format(val_acc))
 
-        graph_acc.append(epoch, {'test_acc': test_acc})
+        graph_acc.append(epoch, {'val_acc': val_acc})
 
     session.done()
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-k", "--key", type=str, help="Losswise API key", default='NA')
+    parser.add_argument("-d", "--dir", type=str, help="Directory where the training data is stored")
+    parser.add_argument("-c", "--cuda", type=bool, help="Enable CUDA", default=True)
+    # parser.add_argument("-c", "--checkpoint", type=str, help="Directory of latest checkpoint.")
+    parser.add_argument("-n", "--name", type=str, help="Session name in Losswise.")
+    args = parser.parse_args()
+
+    params = {
+        "key": args.key,
+        "data_dir": args.dir,
+        "enable_cuda": args.cuda,
+        "learning_rate": 0.000025,
+        "weight_decay": 5e-4,
+        "epochs": 150,
+        "train_batchsize": 32,
+        "save_freq": 10,
+        "lr_updates": 20,
+        "lr_gamma": 0.3
+    }
+
+    train(params)
 
 
 
